@@ -1,6 +1,11 @@
-# 🚚 Courier Management System - Full Stack Application
+# 🚚 Courier Management System
 
 A comprehensive full-stack web application demonstrating **Stored Procedures**, **Functions**, and **Triggers** in MySQL with a React frontend and Node.js/Express backend.
+
+![MySQL](https://img.shields.io/badge/MySQL-8.0+-blue.svg)
+![Node.js](https://img.shields.io/badge/Node.js-14+-green.svg)
+![React](https://img.shields.io/badge/React-18.2-blue.svg)
+![Express](https://img.shields.io/badge/Express-4.18-lightgrey.svg)
 
 ## 📋 Table of Contents
 - [Features](#features)
