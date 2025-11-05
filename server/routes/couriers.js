@@ -239,4 +239,43 @@ router.get('/data/admins', async (req, res) => {
   }
 });
 
+// ============================================================
+// DELETE OPERATION: Delete Courier
+// DELETE /api/couriers/:id
+// ============================================================
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if courier exists
+    const [courier] = await pool.query(
+      'SELECT courier_id, bill_number FROM Couriers WHERE courier_id = ?',
+      [id]
+    );
+
+    if (courier.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Courier not found'
+      });
+    }
+
+    // Delete courier (CASCADE will handle related records)
+    await pool.query('DELETE FROM Couriers WHERE courier_id = ?', [id]);
+
+    res.json({
+      success: true,
+      message: `Courier #${id} (${courier[0].bill_number}) deleted successfully`,
+      deleted_courier: courier[0]
+    });
+  } catch (error) {
+    console.error('Error deleting courier:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete courier',
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;
