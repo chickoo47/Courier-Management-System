@@ -35,6 +35,12 @@ function App() {
     aggregate: []
   });
 
+  // State for creating new users/admins
+  const [createUserMode, setCreateUserMode] = useState(false);
+  const [createAdminMode, setCreateAdminMode] = useState(false);
+  const [newUser, setNewUser] = useState({ name: '', email: '', phone: '', address: '' });
+  const [newAdmin, setNewAdmin] = useState({ name: '', email: '', phone: '', role: 'Manager' });
+
   // Load initial data
   useEffect(() => {
     loadData();
@@ -109,6 +115,40 @@ function App() {
       loadData(); // Refresh data
     } catch (error) {
       setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to update status' });
+    }
+  };
+
+  // Create new user
+  const handleCreateUser = async () => {
+    try {
+      if (!newUser.name || !newUser.email) {
+        setMessage({ type: 'error', text: 'Name and email are required' });
+        return;
+      }
+      const response = await courierAPI.createUser(newUser);
+      setMessage({ type: 'success', text: 'User created successfully!' });
+      setNewUser({ name: '', email: '', phone: '', address: '' });
+      setCreateUserMode(false);
+      loadData(); // Refresh to get new user in dropdown
+    } catch (error) {
+      setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to create user' });
+    }
+  };
+
+  // Create new admin
+  const handleCreateAdmin = async () => {
+    try {
+      if (!newAdmin.name || !newAdmin.email) {
+        setMessage({ type: 'error', text: 'Name and email are required' });
+        return;
+      }
+      const response = await courierAPI.createAdmin(newAdmin);
+      setMessage({ type: 'success', text: 'Admin created successfully!' });
+      setNewAdmin({ name: '', email: '', phone: '', role: 'Manager' });
+      setCreateAdminMode(false);
+      loadData(); // Refresh to get new admin in dropdown
+    } catch (error) {
+      setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to create admin' });
     }
   };
 
@@ -219,35 +259,142 @@ function App() {
             <h3 style={{ marginTop: 0, color: '#1e40af' }}>➕ Add New Courier (Calls AddCourierOrder Procedure)</h3>
             <form onSubmit={handleAddCourier}>
               <div className="form-grid">
+                {/* Customer Section */}
                 <div className="form-group">
-                  <label>Customer *</label>
-                  <select
-                    required
-                    value={newCourier.customer_id}
-                    onChange={(e) => setNewCourier({ ...newCourier, customer_id: e.target.value })}
-                  >
-                    <option value="">Select Customer</option>
-                    {users.map(user => (
-                      <option key={user.user_id} value={user.user_id}>
-                        {user.name} ({user.email})
-                      </option>
-                    ))}
-                  </select>
+                  <label>
+                    Customer * 
+                    <button
+                      type="button"
+                      className="toggle-btn"
+                      onClick={() => setCreateUserMode(!createUserMode)}
+                      style={{ marginLeft: '10px', fontSize: '0.85em' }}
+                    >
+                      {createUserMode ? '📋 Select Existing' : '➕ Create New'}
+                    </button>
+                  </label>
+                  
+                  {!createUserMode ? (
+                    <select
+                      required
+                      value={newCourier.customer_id}
+                      onChange={(e) => setNewCourier({ ...newCourier, customer_id: e.target.value })}
+                    >
+                      <option value="">Select Customer</option>
+                      {users.map(user => (
+                        <option key={user.user_id} value={user.user_id}>
+                          {user.name} ({user.email})
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div style={{ border: '2px dashed #3b82f6', padding: '15px', borderRadius: '8px', background: 'white' }}>
+                      <input
+                        type="text"
+                        placeholder="Customer Name *"
+                        value={newUser.name}
+                        onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                        style={{ marginBottom: '10px' }}
+                      />
+                      <input
+                        type="email"
+                        placeholder="Customer Email *"
+                        value={newUser.email}
+                        onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                        style={{ marginBottom: '10px' }}
+                      />
+                      <input
+                        type="tel"
+                        placeholder="Phone (optional)"
+                        value={newUser.phone}
+                        onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+                        style={{ marginBottom: '10px' }}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Address (optional)"
+                        value={newUser.address}
+                        onChange={(e) => setNewUser({ ...newUser, address: e.target.value })}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-success"
+                        onClick={handleCreateUser}
+                        style={{ marginTop: '10px', fontSize: '0.9em', padding: '8px 15px' }}
+                      >
+                        ✅ Create Customer
+                      </button>
+                    </div>
+                  )}
                 </div>
+
+                {/* Admin Section */}
                 <div className="form-group">
-                  <label>Admin *</label>
-                  <select
-                    required
-                    value={newCourier.admin_id}
-                    onChange={(e) => setNewCourier({ ...newCourier, admin_id: e.target.value })}
-                  >
-                    <option value="">Select Admin</option>
-                    {admins.map(admin => (
-                      <option key={admin.admin_id} value={admin.admin_id}>
-                        {admin.name} ({admin.email})
-                      </option>
-                    ))}
-                  </select>
+                  <label>
+                    Admin * 
+                    <button
+                      type="button"
+                      className="toggle-btn"
+                      onClick={() => setCreateAdminMode(!createAdminMode)}
+                      style={{ marginLeft: '10px', fontSize: '0.85em' }}
+                    >
+                      {createAdminMode ? '📋 Select Existing' : '➕ Create New'}
+                    </button>
+                  </label>
+                  
+                  {!createAdminMode ? (
+                    <select
+                      required
+                      value={newCourier.admin_id}
+                      onChange={(e) => setNewCourier({ ...newCourier, admin_id: e.target.value })}
+                    >
+                      <option value="">Select Admin</option>
+                      {admins.map(admin => (
+                        <option key={admin.admin_id} value={admin.admin_id}>
+                          {admin.name} ({admin.email})
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div style={{ border: '2px dashed #f59e0b', padding: '15px', borderRadius: '8px', background: 'white' }}>
+                      <input
+                        type="text"
+                        placeholder="Admin Name *"
+                        value={newAdmin.name}
+                        onChange={(e) => setNewAdmin({ ...newAdmin, name: e.target.value })}
+                        style={{ marginBottom: '10px' }}
+                      />
+                      <input
+                        type="email"
+                        placeholder="Admin Email *"
+                        value={newAdmin.email}
+                        onChange={(e) => setNewAdmin({ ...newAdmin, email: e.target.value })}
+                        style={{ marginBottom: '10px' }}
+                      />
+                      <input
+                        type="tel"
+                        placeholder="Phone (optional)"
+                        value={newAdmin.phone}
+                        onChange={(e) => setNewAdmin({ ...newAdmin, phone: e.target.value })}
+                        style={{ marginBottom: '10px' }}
+                      />
+                      <select
+                        value={newAdmin.role}
+                        onChange={(e) => setNewAdmin({ ...newAdmin, role: e.target.value })}
+                      >
+                        <option value="Manager">Manager</option>
+                        <option value="Supervisor">Supervisor</option>
+                        <option value="Operator">Operator</option>
+                      </select>
+                      <button
+                        type="button"
+                        className="btn btn-warning"
+                        onClick={handleCreateAdmin}
+                        style={{ marginTop: '10px', fontSize: '0.9em', padding: '8px 15px' }}
+                      >
+                        ✅ Create Admin
+                      </button>
+                    </div>
+                  )}
                 </div>
                 <div className="form-group">
                   <label>Bill Number *</label>

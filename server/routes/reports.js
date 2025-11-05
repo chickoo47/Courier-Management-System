@@ -3,6 +3,120 @@ const router = express.Router();
 const { pool } = require('../database');
 
 // ============================================================
+// HELPER ENDPOINTS: Create Users and Admins
+// ============================================================
+
+// Create new user
+router.post('/users', async (req, res) => {
+  try {
+    const { name, email, phone, address } = req.body;
+
+    if (!name || !email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name and email are required'
+      });
+    }
+
+    const [result] = await pool.query(
+      'INSERT INTO Users (name, email, phone, address) VALUES (?, ?, ?, ?)',
+      [name, email, phone || null, address || null]
+    );
+
+    const [newUser] = await pool.query(
+      'SELECT * FROM Users WHERE user_id = ?',
+      [result.insertId]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'User created successfully',
+      data: newUser[0]
+    });
+  } catch (error) {
+    console.error('Error creating user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create user',
+      error: error.message
+    });
+  }
+});
+
+// Create new admin
+router.post('/admins', async (req, res) => {
+  try {
+    const { name, email, phone, role } = req.body;
+
+    if (!name || !email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name and email are required'
+      });
+    }
+
+    const [result] = await pool.query(
+      'INSERT INTO Admins (name, email, phone, role) VALUES (?, ?, ?, ?)',
+      [name, email, phone || null, role || 'Manager']
+    );
+
+    const [newAdmin] = await pool.query(
+      'SELECT * FROM Admins WHERE admin_id = ?',
+      [result.insertId]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Admin created successfully',
+      data: newAdmin[0]
+    });
+  } catch (error) {
+    console.error('Error creating admin:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create admin',
+      error: error.message
+    });
+  }
+});
+
+// Get all users
+router.get('/users', async (req, res) => {
+  try {
+    const [users] = await pool.query('SELECT * FROM Users ORDER BY created_at DESC');
+    res.json({
+      success: true,
+      count: users.length,
+      data: users
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch users',
+      error: error.message
+    });
+  }
+});
+
+// Get all admins
+router.get('/admins', async (req, res) => {
+  try {
+    const [admins] = await pool.query('SELECT * FROM Admins ORDER BY created_at DESC');
+    res.json({
+      success: true,
+      count: admins.length,
+      data: admins
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch admins',
+      error: error.message
+    });
+  }
+});
+
+// ============================================================
 // COMPLEX QUERY 1: JOIN
 // GET /api/reports/join
 // Demonstrates JOIN operation across multiple tables

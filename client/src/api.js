@@ -33,6 +33,10 @@ export const courierAPI = {
   // Helper endpoints
   getUsers: () => api.get('/couriers/data/users'),
   getAdmins: () => api.get('/couriers/data/admins'),
+  
+  // Create new user/admin
+  createUser: (userData) => api.post('/reports/users', userData),
+  createAdmin: (adminData) => api.post('/reports/admins', adminData),
 };
 
 // Reports API calls
