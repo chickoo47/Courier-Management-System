@@ -27,6 +27,9 @@ export const courierAPI = {
   // TRIGGER VALIDATION: Get logs (proves trigger fired)
   getCourierLogs: (courierId) => api.get(`/couriers/${courierId}/logs`),
   
+  // DELETE: Delete courier
+  deleteCourier: (courierId) => api.delete(`/couriers/${courierId}`),
+  
   // Helper endpoints
   getUsers: () => api.get('/couriers/data/users'),
   getAdmins: () => api.get('/couriers/data/admins'),

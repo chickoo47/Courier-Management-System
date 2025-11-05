@@ -137,6 +137,22 @@ function App() {
     }
   };
 
+  const handleDeleteCourier = async (courier) => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete courier #${courier.courier_id} (${courier.bill_number})?\n\nThis will also delete all related:\n- Delivery History\n- Audit Logs\n- Comments\n\nThis action cannot be undone!`
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      const response = await courierAPI.deleteCourier(courier.courier_id);
+      setMessage({ type: 'success', text: response.data.message });
+      loadData(); // Refresh data
+    } catch (error) {
+      setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to delete courier' });
+    }
+  };
+
   // ============================================================
   // HELPERS
   // ============================================================
@@ -316,14 +332,23 @@ function App() {
                           <button
                             className="btn btn-warning"
                             onClick={() => openUpdateModal(courier)}
+                            title="Update Status"
                           >
-                            🔄 Update Status
+                            🔄 Update
                           </button>
                           <button
                             className="btn btn-info"
                             onClick={() => viewLogs(courier.courier_id)}
+                            title="View Logs"
                           >
-                            📋 View Logs
+                            📋 Logs
+                          </button>
+                          <button
+                            className="btn btn-danger"
+                            onClick={() => handleDeleteCourier(courier)}
+                            title="Delete Courier"
+                          >
+                            🗑️ Delete
                           </button>
                         </div>
                       </td>

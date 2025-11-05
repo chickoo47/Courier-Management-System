@@ -181,6 +181,18 @@
   background: #d97706;
 }
 
+.btn-danger {
+  background: #ef4444;
+  color: white;
+  font-size: 0.85em;
+  padding: 8px 15px;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
 .btn-secondary {
   background: #6b7280;
   color: white;
