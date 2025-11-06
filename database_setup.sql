@@ -276,6 +276,60 @@ END //
 DELIMITER ;
 
 -- ============================================================
+-- FUNCTION 2: GetCustomerCourierCount (NEW)
+-- Purpose: Calculates total number of couriers for a specific customer
+-- Parameters: customer_id
+-- Returns: Integer count of total couriers
+-- ============================================================
+DELIMITER //
+
+CREATE FUNCTION GetCustomerCourierCount(p_customer_id INT)
+RETURNS INT
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    DECLARE v_count INT;
+    
+    SELECT COUNT(*) INTO v_count
+    FROM Couriers
+    WHERE customer_id = p_customer_id;
+    
+    RETURN v_count;
+END //
+
+DELIMITER ;
+
+-- ============================================================
+-- TRIGGER 2: after_courier_delivered (NEW)
+-- Purpose: Automatically creates a thank you comment when courier is delivered
+-- Fires: After UPDATE on Couriers table when status changes to 'Delivered'
+-- ============================================================
+DELIMITER //
+
+CREATE TRIGGER after_courier_delivered
+AFTER UPDATE ON Couriers
+FOR EACH ROW
+BEGIN
+    -- Only fire if status changed TO 'Delivered'
+    IF OLD.status != 'Delivered' AND NEW.status = 'Delivered' THEN
+        -- Insert automatic thank you comment
+        INSERT INTO Comments (
+            courier_id,
+            user_id,
+            comment_text
+        ) VALUES (
+            NEW.courier_id,
+            NEW.customer_id,
+            CONCAT('Thank you for using our courier service! Your package (', 
+                   NEW.bill_number, 
+                   ') has been successfully delivered. We hope you are satisfied with our service.')
+        );
+    END IF;
+END //
+
+DELIMITER ;
+
+-- ============================================================
 -- SAMPLE DATA - Users (Customers)
 -- ============================================================
 INSERT INTO Users (name, email, phone, address) VALUES

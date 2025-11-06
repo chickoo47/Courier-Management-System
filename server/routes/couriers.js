@@ -240,6 +240,77 @@ router.get('/data/admins', async (req, res) => {
 });
 
 // ============================================================
+// FUNCTION 2 (NEW): Get Customer Courier Count
+// GET /api/couriers/customer/:id/count
+// MUST execute: SELECT GetCustomerCourierCount(?) AS count
+// ============================================================
+router.get('/customer/:id/count', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Execute function to get customer's total courier count
+    const [rows] = await pool.query(
+      'SELECT GetCustomerCourierCount(?) AS total_couriers',
+      [id]
+    );
+
+    res.json({
+      success: true,
+      message: 'Customer courier count retrieved using database function',
+      customer_id: parseInt(id),
+      total_couriers: rows[0].total_couriers
+    });
+  } catch (error) {
+    console.error('Error getting customer courier count:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get customer courier count',
+      error: error.message
+    });
+  }
+});
+
+// ============================================================
+// TRIGGER 2 VALIDATION: Get Comments for Courier
+// GET /api/couriers/:id/comments
+// This endpoint fetches comments to PROVE the 'after_courier_delivered' trigger fired
+// ============================================================
+router.get('/:id/comments', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [comments] = await pool.query(
+      `SELECT 
+        c.comment_id,
+        c.comment_text,
+        c.created_at,
+        u.name AS user_name,
+        u.email AS user_email
+      FROM Comments c
+      LEFT JOIN Users u ON c.user_id = u.user_id
+      WHERE c.courier_id = ?
+      ORDER BY c.created_at DESC`,
+      [id]
+    );
+
+    res.json({
+      success: true,
+      message: 'Comments retrieved successfully (Proof of Trigger 2 execution)',
+      courier_id: parseInt(id),
+      comments: comments,
+      trigger_info: 'When a courier status is changed to "Delivered", the after_courier_delivered trigger automatically creates a thank you comment'
+    });
+  } catch (error) {
+    console.error('Error fetching comments:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch comments',
+      error: error.message
+    });
+  }
+});
+
+// ============================================================
 // DELETE OPERATION: Delete Courier
 // DELETE /api/couriers/:id
 // ============================================================
