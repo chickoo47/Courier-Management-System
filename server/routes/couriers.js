@@ -124,6 +124,7 @@ router.get('/status/:id', async (req, res) => {
 // GET /api/couriers/:id/logs
 // This endpoint fetches data from Delivery_History AND Courier_Audit
 // to PROVE that the trigger 'after_courier_status_update' fired
+// Also fetches Comments (including trigger-generated comments)
 // ============================================================
 router.get('/:id/logs', async (req, res) => {
   try {
@@ -160,13 +161,31 @@ router.get('/:id/logs', async (req, res) => {
       [id]
     );
 
+    // Fetch comments for this courier (including trigger-generated comments)
+    const [comments] = await pool.query(
+      `SELECT 
+        c.comment_id,
+        c.courier_id,
+        c.user_id,
+        c.comment_text,
+        c.created_at,
+        u.name as user_name,
+        u.email as user_email
+      FROM Comments c
+      JOIN Users u ON c.user_id = u.user_id
+      WHERE c.courier_id = ?
+      ORDER BY c.created_at DESC`,
+      [id]
+    );
+
     res.json({
       success: true,
       message: 'Logs retrieved successfully (Proof of Trigger execution)',
       courier_id: id,
       delivery_history: deliveryHistory,
       audit_logs: auditLogs,
-      trigger_info: 'These records were automatically created by the after_courier_status_update trigger'
+      comments: comments,
+      trigger_info: 'These records were automatically created by the after_courier_status_update trigger. Comments may also include auto-generated thank you messages from after_courier_delivered trigger.'
     });
   } catch (error) {
     console.error('Error fetching logs:', error);

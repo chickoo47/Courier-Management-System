@@ -1,17 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './CustomerPortal.css';
 
-const CustomerPortal = () => {
+const CustomerPortal = ({ initialData }) => {
   const [trackingData, setTrackingData] = useState({
-    name: '',
-    billNumber: ''
+    name: initialData?.name || '',
+    billNumber: initialData?.billNumber || ''
   });
-  const [courierInfo, setCourierInfo] = useState(null);
+  const [courierInfo, setCourierInfo] = useState(initialData?.courier || null);
   const [deliveryHistory, setDeliveryHistory] = useState([]);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [newComment, setNewComment] = useState('');
+
+  // If initialData provided, load the order details automatically
+  useEffect(() => {
+    if (initialData && initialData.courier) {
+      loadOrderDetails(initialData.courier.courier_id);
+    }
+  }, [initialData]);
+
+  const loadOrderDetails = async (courierId) => {
+    try {
+      // Fetch delivery history
+      const historyResponse = await fetch(
+        `http://localhost:5001/api/couriers/${courierId}/history`
+      );
+      const historyData = await historyResponse.json();
+      if (historyData.success) {
+        setDeliveryHistory(historyData.history);
+      }
+
+      // Fetch comments
+      const commentsResponse = await fetch(
+        `http://localhost:5001/api/couriers/${courierId}/comments`
+      );
+      const commentsData = await commentsResponse.json();
+      if (commentsData.success) {
+        setComments(commentsData.comments);
+      }
+    } catch (err) {
+      console.error('Error loading order details:', err);
+    }
+  };
 
   const handleInputChange = (e) => {
     setTrackingData({
@@ -184,32 +215,24 @@ const CustomerPortal = () => {
                 <span className="value">{courierInfo.bill_number}</span>
               </div>
               <div className="detail-row">
-                <span className="label">Weight:</span>
-                <span className="value">{courierInfo.weight} kg</span>
+                <span className="label">Pickup Address:</span>
+                <span className="value">{courierInfo.pickup_address}</span>
               </div>
               <div className="detail-row">
-                <span className="label">Source:</span>
-                <span className="value">{courierInfo.source_location}</span>
-              </div>
-              <div className="detail-row">
-                <span className="label">Destination:</span>
-                <span className="value">{courierInfo.destination_location}</span>
-              </div>
-              <div className="detail-row">
-                <span className="label">Total Cost:</span>
-                <span className="value cost">₹{courierInfo.total_cost}</span>
+                <span className="label">Delivery Address:</span>
+                <span className="value">{courierInfo.delivery_address}</span>
               </div>
               <div className="detail-row">
                 <span className="label">Order Date:</span>
                 <span className="value">
-                  {new Date(courierInfo.order_date).toLocaleDateString()}
+                  {new Date(courierInfo.created_at).toLocaleDateString()}
                 </span>
               </div>
-              {courierInfo.estimated_delivery && (
+              {courierInfo.updated_at && (
                 <div className="detail-row">
-                  <span className="label">Expected Delivery:</span>
+                  <span className="label">Last Updated:</span>
                   <span className="value">
-                    {new Date(courierInfo.estimated_delivery).toLocaleDateString()}
+                    {new Date(courierInfo.updated_at).toLocaleString()}
                   </span>
                 </div>
               )}
