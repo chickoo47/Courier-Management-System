@@ -349,4 +349,82 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// ============================================================
+// CUSTOMER PORTAL: Track order by bill number and name
+// GET /api/couriers/track?billNumber=BILL-1001&name=John Doe
+// ============================================================
+router.get('/track', async (req, res) => {
+  try {
+    const { billNumber, name } = req.query;
+
+    if (!billNumber || !name) {
+      return res.status(400).json({
+        success: false,
+        message: 'Bill number and name are required'
+      });
+    }
+
+    // Find courier by bill number and customer name
+    const [couriers] = await pool.query(`
+      SELECT c.*, u.name as customer_name, u.email, u.phone, u.address
+      FROM Couriers c
+      JOIN Users u ON c.customer_id = u.user_id
+      WHERE c.bill_number = ? AND u.name LIKE ?
+    `, [billNumber, `%${name}%`]);
+
+    if (couriers.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No courier found with this bill number and name'
+      });
+    }
+
+    res.json({
+      success: true,
+      courier: couriers[0]
+    });
+  } catch (error) {
+    console.error('Error tracking courier:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to track courier',
+      error: error.message
+    });
+  }
+});
+
+// ============================================================
+// CUSTOMER PORTAL: Add comment
+// POST /api/couriers/comment
+// ============================================================
+router.post('/comment', async (req, res) => {
+  try {
+    const { courier_id, user_id, comment_text } = req.body;
+
+    if (!courier_id || !user_id || !comment_text) {
+      return res.status(400).json({
+        success: false,
+        message: 'All fields are required'
+      });
+    }
+
+    await pool.query(
+      'INSERT INTO Comments (courier_id, user_id, comment_text) VALUES (?, ?, ?)',
+      [courier_id, user_id, comment_text]
+    );
+
+    res.json({
+      success: true,
+      message: 'Comment added successfully'
+    });
+  } catch (error) {
+    console.error('Error adding comment:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to add comment',
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;

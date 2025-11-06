@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import { courierAPI, reportsAPI } from './api';
+import CustomerPortal from './CustomerPortal';
 
 function App() {
+  // View mode toggle
+  const [viewMode, setViewMode] = useState('admin'); // 'admin' or 'customer'
+
   // State for couriers
   const [couriers, setCouriers] = useState([]);
   const [users, setUsers] = useState([]);
@@ -212,7 +216,7 @@ function App() {
     setTimeout(() => setMessage({ type: '', text: '' }), 5000);
   };
 
-  if (loading) {
+  if (loading && viewMode === 'admin') {
     return (
       <div className="App">
         <div className="loading">Loading Courier Management System</div>
@@ -220,12 +224,39 @@ function App() {
     );
   }
 
+  // If customer view, show customer portal
+  if (viewMode === 'customer') {
+    return (
+      <div className="App">
+        <div className="view-toggle">
+          <button 
+            className="toggle-view-btn"
+            onClick={() => setViewMode('admin')}
+          >
+            🔐 Switch to Admin View
+          </button>
+        </div>
+        <CustomerPortal />
+      </div>
+    );
+  }
+
   return (
     <div className="App">
       <div className="app-container">
+        {/* View Toggle */}
+        <div className="view-toggle">
+          <button 
+            className="toggle-view-btn customer"
+            onClick={() => setViewMode('customer')}
+          >
+            👤 Switch to Customer View
+          </button>
+        </div>
+
         {/* Header */}
         <div className="app-header">
-          <h1>🚚 Courier Management System</h1>
+          <h1>🚚 Courier Management System - Admin Panel</h1>
           <p>Full-Stack Application demonstrating Stored Procedures, Functions, and Triggers</p>
           <div className="subtitle">
             <strong>📋 Project Review Dashboard:</strong> This interface demonstrates all required database operations 
