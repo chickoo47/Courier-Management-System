@@ -20,7 +20,7 @@ Develop a comprehensive database-driven courier management application that demo
 | **GitHub Username** | chickoo47 |
 | **Institution** | Database Management Systems Lab |
 | **Academic Year** | 2025 |
-| **Submission Date** | October 27, 2025 |
+| **Submission Date** | November 6, 2025 |
 | **Course** | Database Management Systems |
 | **Project Type** | Full-Stack Web Application |
 
@@ -62,14 +62,22 @@ This project implements a full-stack Courier Management System that addresses th
 **Key Features:**
 - **Stored Procedure 1 (CREATE):** `AddCourierOrder` - Creates new courier orders with automatic status initialization
 - **Stored Procedure 2 (UPDATE):** `UpdateCourierStatus` - Updates order status with dual logging mechanism
-- **Function (READ):** `GetCourierStatus` - Retrieves current status using database function
-- **Trigger (AUDIT):** `after_courier_status_update` - Automatically logs all status changes to audit table
+- **Function 1 (READ):** `GetCourierStatus` - Retrieves current status using database function
+- **Function 2 (ANALYTICS):** `GetCustomerCourierCount` - Returns total courier count for customer analytics
+- **Trigger 1 (AUDIT):** `after_courier_status_update` - Automatically logs all status changes to audit tables
+- **Trigger 2 (ENGAGEMENT):** `after_courier_delivered` - Auto-generates thank you comments on delivery completion
+- **Customer Portal:** Dedicated interface for customers to track orders and submit feedback
+- **Authentication System:** Dual login (Admin + Customer) with secure session management
+- **Admin Panel:** Complete CRUD operations with inline entity creation and comment viewing
 
 **Business Value:**
 - Complete traceability of all courier operations
+- Automated customer engagement through trigger-generated messages
+- Two-way communication between customers and administrators
 - Automated compliance and audit reporting
 - Real-time status visibility for customers and administrators
 - Data integrity through foreign key constraints and transactions
+- Separation of concerns with role-based interfaces
 - Scalable architecture supporting future enhancements
 
 ---
@@ -2505,28 +2513,123 @@ Frontend runs on: `http://localhost:3000`
 
 ## 13.5 Key Features in Repository
 
-1. **Database Layer**
-   - 2 Stored Procedures (AddCourierOrder, UpdateCourierStatus)
-   - 1 MySQL Function (GetCourierStatus)
-   - 1 Trigger (after_courier_status_update)
-   - 6 Normalized Tables (3NF)
+### 1. **Database Layer (Enhanced)**
+   - **2 Stored Procedures**
+     - `AddCourierOrder` - Creates new courier orders
+     - `UpdateCourierStatus` - Updates order status with logging
+   
+   - **2 MySQL Functions**
+     - `GetCourierStatus` - Retrieves current courier status
+     - `GetCustomerCourierCount` - Returns total couriers for a customer
+   
+   - **2 Triggers**
+     - `after_courier_status_update` - Auto-logs status changes to audit tables
+     - `after_courier_delivered` - Auto-generates thank you comments on delivery
+   
+   - **6 Normalized Tables (3NF)**
+     - Users, Admins, Couriers, Delivery_History, Courier_Audit, Comments
 
-2. **Backend (Node.js/Express)**
-   - RESTful API design
+### 2. **Backend (Node.js/Express)**
+   - RESTful API design with 25+ endpoints
    - mysql2 Promise-based connection pooling
-   - Error handling and validation
-   - CORS enabled
+   - Comprehensive error handling and validation
+   - CORS enabled for cross-origin requests
+   - Customer tracking API endpoints
+   - Comment management system
 
-3. **Frontend (React)**
-   - Component-based architecture
-   - Axios for HTTP requests
-   - Forms for CRUD operations
-   - Dynamic status display
+### 3. **Frontend Features**
 
-4. **Advanced SQL**
-   - JOIN queries (INNER, LEFT)
-   - NESTED queries (Subqueries with IN)
-   - AGGREGATE queries (COUNT, MIN, MAX, GROUP BY)
+   #### 3.1 **Admin Panel (Full Management)**
+   - Component-based React architecture
+   - Complete CRUD operations interface
+   - Stored procedure invocation forms
+   - Function testing interface
+   - Trigger validation with visual proof
+   - Real-time status updates
+   - Audit log viewing modal with 3 sections:
+     - Delivery History
+     - Courier Audit Logs
+     - Comments & Feedback (NEW!)
+   - Inline user/admin creation
+   - Delete operations with cascade confirmation
+   - Complex SQL query result displays
+
+   #### 3.2 **Customer Portal (NEW!)**
+   - Dedicated customer tracking interface
+   - Order tracking by name + bill number
+   - Real-time status visualization with color-coded badges
+   - Visual timeline of package journey
+   - Pickup and delivery address display
+   - Comment submission system for feedback
+   - View auto-generated thank you messages from trigger
+   - Mobile-responsive design
+   - Modern gradient UI with animations
+
+   #### 3.3 **Authentication System (NEW!)**
+   - Dual login system (Admin + Customer)
+   - **Admin Login:**
+     - Username: "Aryan M"
+     - Password: "1234567"
+     - Access to full admin panel
+   - **Customer Login:**
+     - Name + Bill Number authentication
+     - Direct access to their order tracking
+   - Secure session management
+   - Logout functionality
+   - Login state persistence
+
+### 4. **Advanced SQL Demonstrations**
+   - **JOIN queries** (INNER, LEFT joins with multiple tables)
+   - **NESTED queries** (Subqueries with IN, EXISTS)
+   - **AGGREGATE queries** (COUNT, MIN, MAX, AVG, GROUP BY, HAVING)
+   - **Complex JOINs** with Comments table integration
+   - **Trigger-based automation** for customer engagement
+
+### 5. **Key Improvements & Features**
+   - ✅ **3rd Normal Form (3NF)** compliance
+   - ✅ **Separation of concerns** (Admin vs Customer interfaces)
+   - ✅ **Automated customer engagement** (trigger-generated comments)
+   - ✅ **Two-way communication** (customers can comment, admins can view)
+   - ✅ **Visual trigger proof** in admin panel (yellow highlighting for auto-comments)
+   - ✅ **Complete audit trail** with timestamps
+   - ✅ **Inline entity creation** (no page refresh needed)
+   - ✅ **Cascade delete operations** with warnings
+   - ✅ **Real-time data synchronization**
+   - ✅ **Professional UI/UX** with gradient backgrounds and animations
+
+### 6. **Project Structure**
+```
+courier-management-system/
+├── client/                    # React Frontend
+│   ├── src/
+│   │   ├── App.js            # Admin Panel (Main)
+│   │   ├── CustomerPortal.js # Customer Interface
+│   │   ├── Login.js          # Authentication
+│   │   ├── api.js            # API Client
+│   │   └── *.css             # Styling
+├── server/                    # Node.js Backend
+│   ├── server.js             # Express Server
+│   ├── database.js           # MySQL Connection
+│   └── routes/               # API Routes
+│       ├── couriers.js       # Main CRUD + Tracking
+│       └── reports.js        # Complex Queries
+├── database_setup.sql        # Complete Schema + Data
+├── PROJECT_REPORT.md         # This Document
+├── CUSTOMER_PORTAL_GUIDE.md  # Customer Portal Documentation
+└── README.md                 # Setup Instructions
+```
+
+### 7. **Demonstrable Features for Presentation**
+1. **Login System** - Show both admin and customer login
+2. **Admin CRUD** - Create, read, update, delete couriers
+3. **Stored Procedures** - Live execution in UI
+4. **Functions** - Test GetCourierStatus and GetCustomerCourierCount
+5. **Trigger 1** - Update status → View auto-generated audit logs
+6. **Trigger 2** - Set status to "Delivered" → See auto thank you comment
+7. **Customer Portal** - Track order, view timeline, submit comments
+8. **Admin Views Comments** - Click "View Logs" to see customer feedback
+9. **Complex Queries** - Show JOIN, NESTED, AGGREGATE results
+10. **3NF Compliance** - Explain normalized table structure
 
 ---
 
@@ -2548,5 +2651,5 @@ Frontend runs on: `http://localhost:3000`
 **Project:** Courier Management System  
 **Course:** Database Management Systems Lab  
 **Academic Year:** 2025  
-**Submission Date:** October 27, 2025
+**Submission Date:** November 6, 2025
 
